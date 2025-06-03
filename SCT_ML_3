@@ -1,0 +1,54 @@
+# Pure Python Linear SVM for Cat vs Dog classification
+# Simulated image features (e.g., brightness, edge count)
+
+# Each sample is [feature1, feature2, label]
+# -1 = Cat, 1 = Dog
+data = [
+    [0.2, 0.3, -1],  # Cat-like features
+    [0.1, 0.4, -1],
+    [0.15, 0.35, -1],
+    [0.75, 0.8, 1],   # Dog-like features
+    [0.7, 0.85, 1],
+    [0.8, 0.75, 1]
+]
+
+# Initialize weights and bias
+w = [0.0, 0.0]
+b = 0.0
+learning_rate = 0.01
+epochs = 1000
+
+# Training using gradient descent on hinge loss
+for epoch in range(epochs):
+    for x1, x2, y in data:
+        margin = y * (w[0]*x1 + w[1]*x2 + b)
+        if margin >= 1:
+            # No loss, apply regularization only
+            w[0] -= learning_rate * (2 * w[0])
+            w[1] -= learning_rate * (2 * w[1])
+        else:
+            # Hinge loss update
+            w[0] += learning_rate * (y * x1 - 2 * w[0])
+            w[1] += learning_rate * (y * x2 - 2 * w[1])
+            b += learning_rate * y
+
+# Prediction function
+def predict(x1, x2):
+    result = w[0]*x1 + w[1]*x2 + b
+    return 1 if result >= 0 else -1
+
+# Test simulated "images"
+test_data = [
+    [0.2, 0.3],  # Should be Cat
+    [0.75, 0.85],# Should be Dog
+    [0.18, 0.32],# Should be Cat
+    [0.77, 0.78] # Should be Dog
+]
+
+# Output predictions
+print("Trained Weights:", w)
+print("Bias:", b)
+print("\nPredictions:")
+for x1, x2 in test_data:
+    result = predict(x1, x2)
+    print(f"Features: [{x1}, {x2}] => {'Dog' if result == 1 else 'Cat'}")
