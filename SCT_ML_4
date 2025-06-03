@@ -1,0 +1,48 @@
+# Simple KNN Classifier for Hand Gesture Recognition
+
+# Simulated feature dataset
+data = [
+    [5, 0.8, 0.9, 'open'],
+    [0, 0.5, 0.1, 'fist'],
+    [1, 0.6, 0.2, 'point'],
+    [2, 0.7, 0.6, 'peace'],
+    [5, 0.85, 0.95, 'open'],
+    [0, 0.48, 0.05, 'fist'],
+    [1, 0.58, 0.15, 'point'],
+    [2, 0.72, 0.65, 'peace']
+]
+
+# Distance function
+def euclidean(p1, p2):
+    return ((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2 + (p1[2]-p2[2])**2) ** 0.5
+
+# KNN function
+def predict(test_point, k=3):
+    distances = []
+    for entry in data:
+        dist = euclidean(test_point, entry[:3])
+        distances.append((dist, entry[3]))
+    distances.sort()
+    top_k = distances[:k]
+
+    # Count votes
+    votes = {}
+    for _, label in top_k:
+        votes[label] = votes.get(label, 0) + 1
+
+    # Return the label with most votes
+    return max(votes, key=votes.get)
+
+# Test new "gestures"
+test_samples = [
+    [5, 0.82, 0.88],  # should be 'open'
+    [0, 0.49, 0.1],   # should be 'fist'
+    [1, 0.59, 0.18],  # should be 'point'
+    [2, 0.71, 0.62],  # should be 'peace'
+]
+
+# Run predictions
+print("Gesture Predictions:\n")
+for sample in test_samples:
+    result = predict(sample)
+    print(f"Features {sample} => Gesture: {result}")
