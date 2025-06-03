@@ -1,0 +1,68 @@
+# K-Means Clustering
+
+import random
+
+# Sample customer data: [total_spent, items_bought]
+data = [
+    [200, 5],
+    [220, 6],
+    [250, 7],
+    [800, 25],
+    [850, 30],
+    [900, 28],
+    [100, 3],
+    [120, 4],
+    [875, 26],
+    [260, 8]
+]
+
+# Euclidean distance function
+def distance(p1, p2):
+    return ((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2) ** 0.5
+
+# Compute centroid from a list of points
+def compute_centroid(cluster):
+    x_sum = sum(point[0] for point in cluster)
+    y_sum = sum(point[1] for point in cluster)
+    return [x_sum / len(cluster), y_sum / len(cluster)]
+
+# K-means algorithm
+def kmeans(data, k, max_iters=100):
+    # Randomly initialize centroids
+    centroids = random.sample(data, k)
+    
+    for it in range(max_iters):
+        # Step 1: Assign points to the nearest centroid
+        clusters = [[] for _ in range(k)]
+        for point in data:
+            dists = [distance(point, centroid) for centroid in centroids]
+            min_index = dists.index(min(dists))
+            clusters[min_index].append(point)
+
+        # Step 2: Recalculate centroids
+        new_centroids = []
+        for cluster in clusters:
+            if cluster:
+                new_centroids.append(compute_centroid(cluster))
+            else:
+                # Handle empty cluster
+                new_centroids.append(random.choice(data))
+
+        # Stop if centroids do not change
+        if all(distance(centroids[i], new_centroids[i]) < 1e-4 for i in range(k)):
+            break
+
+        centroids = new_centroids
+
+    return clusters, centroids
+
+# Run K-means with k = 3
+k = 3
+clusters, centroids = kmeans(data, k)
+
+# Print results
+for i in range(k):
+    print(f"\nCluster {i + 1}:")
+    for point in clusters[i]:
+        print(f"Customer - Spent: ${point[0]}, Items: {point[1]}")
+    print(f"Centroid: {centroids[i]}")
