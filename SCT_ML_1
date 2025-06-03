@@ -77,3 +77,4 @@ test_beds = 3
 test_baths = 2
 predicted_price = predict(test_sqft, test_beds, test_baths)
 print(f"\nPredicted price for a {test_sqft} sqft, {test_beds} bed, {test_baths} bath house: ${predicted_price:.2f}")
+
