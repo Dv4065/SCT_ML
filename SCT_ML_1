@@ -1,0 +1,79 @@
+# House Price Prediction using Linear Regression
+
+# Sample dataset (features: sqft, bedrooms, bathrooms), target: price
+data = [
+    [1400, 3, 1, 245000],
+    [1600, 3, 2, 312000],
+    [1700, 3, 2, 279000],
+    [1875, 2, 2, 308000],
+    [1100, 2, 1, 199000],
+    [1550, 4, 2, 219000],
+    [2350, 4, 3, 405000],
+    [2450, 3, 3, 324000],
+]
+
+# Split into X (features) and y (target)
+X = []
+y = []
+for row in data:
+    X.append([1, row[0], row[1], row[2]])  # add 1 for bias term
+    y.append(row[3])
+
+# Transpose of a matrix
+def transpose(m):
+    return [[m[j][i] for j in range(len(m))] for i in range(len(m[0]))]
+
+# Matrix multiplication
+def matmul(A, B):
+    result = [[0] * len(B[0]) for _ in range(len(A))]
+    for i in range(len(A)):
+        for j in range(len(B[0])):
+            for k in range(len(B)):
+                result[i][j] += A[i][k] * B[k][j]
+    return result
+
+# Invert a 4x4 matrix (hardcoded for this small example)
+def inverse4x4(m):
+    from copy import deepcopy
+    n = 4
+    identity = [[float(i == j) for j in range(n)] for i in range(n)]
+    mat = deepcopy(m)
+
+    for i in range(n):
+        factor = mat[i][i]
+        for j in range(n):
+            mat[i][j] /= factor
+            identity[i][j] /= factor
+        for k in range(n):
+            if k != i:
+                factor = mat[k][i]
+                for j in range(n):
+                    mat[k][j] -= factor * mat[i][j]
+                    identity[k][j] -= factor * identity[i][j]
+    return identity
+
+# Convert y to column vector
+y_col = [[v] for v in y]
+
+# Normal Equation: (X^T * X)^-1 * X^T * y
+X_T = transpose(X)
+XTX = matmul(X_T, X)
+XTX_inv = inverse4x4(XTX)
+XTy = matmul(X_T, y_col)
+weights = matmul(XTX_inv, XTy)
+
+# Print the weights
+print("Learned Weights:")
+for i, w in enumerate(weights):
+    print(f"w{i} = {w[0]:.2f}")
+
+# Predict function
+def predict(sqft, beds, baths):
+    return weights[0][0] + weights[1][0] * sqft + weights[2][0] * beds + weights[3][0] * baths
+
+# Test prediction
+test_sqft = 2000
+test_beds = 3
+test_baths = 2
+predicted_price = predict(test_sqft, test_beds, test_baths)
+print(f"\nPredicted price for a {test_sqft} sqft, {test_beds} bed, {test_baths} bath house: ${predicted_price:.2f}")
